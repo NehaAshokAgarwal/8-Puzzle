@@ -1,0 +1,144 @@
+1. Enter the number of hours it took you to complete the project between
+   the <<< and >>> signs below (eg, <<<10>>>).
+
+   <<< 20 >>>
+   
+2. Enter the difficulty level (1: very easy; 5: very difficult) of the project
+   between the <<< and >>> signs below (eg, <<<3>>>).
+
+   <<< 4 >>>
+
+3. Provide a short description of how you approached each problem, issues you 
+   encountered, and how you resolved those issues.
+
+   Problem 1 (Board Data Type)
+       Approach:
+       1) Instance Variables - int[][]tiles(2-D array), int n (Size of the board),
+       int hamming (Hamming distance), int manhattan(Manhattan distance),
+       and, int blankPos (Position of the blank tile in the row major order).
+
+       2) Constructor() - Initialising the this.tiles to tiles(initial 2-D array), this.n to n.
+       Then, I am calculating the position of the blank tile, hamming distance, manhattan distance
+       and initialising it the instance variable.
+       To calculate them, I did nested for-loop. That is for each tile in the tiles, I searched for
+       the tile with a value of 0. Once I got the position of the blank tile in the tiles, I used the
+       row-major order formula to figure out the position of the blank tile in the 1-D array. Also,
+       I added 1 to it, because in our implementation, we chose to start the encoding from the index 1.
+       To calculate the Hamming distance, I simply checked if the element at (i,j) is equal to its
+       corresponding index in the 1-D array. If not then I increment the hamming distance by 1. This
+       is how I am able to figure out the number of tiles in the wrong position in the 2D array tiles.
+       To calculate the manhattan distance, I figured out the goal position of the tile by using the
+       row-major formula. As the value of the tile is the row major order, and converting it into the
+       index gives me the goal position of that tile. Also, manhattan distance is simply the difference
+       between the sum of the x-coordinate and y-coordinate.  Thus, difference between the goal position
+       and the actual position, gives me the manhattan distance.
+
+       3) size() - I simply returned this.n which is the size of the board.
+
+       4) tileAt() - I returned the tiles[i][j] which returns the tile at (i,j) in the tiles.
+
+       5) hamming() - I simply returned the instance variable this.hamming as I alculated the hamming
+       distance in the constructor and stored the value in it.
+
+       5) manhattan() - In this as well, I returned the instance variable this.manhattan. As i calculated
+       the manhattan distance in the constructor and stored the value in it.
+
+       6) isGoal() - The goal board is the one in which each tile in tiles is at the correct place.
+       This, I returned this.hamming == 0. Meaning that there is no tile at the wrong position.
+
+       7)isSolvable() - In this, I am checking if the Board is solvable or not.
+       A board is solvable or not depends on two situations. First,A board is solvable if the size of the
+       board is odd, and the number of inversion is even. Second, a board is solvable, if the the size of
+       the board is even and the number of inversion + row of the blank tile is odd. Thus, this way one
+       is able to find out if the board is solvable or not. In order to find out the number of inversion
+       , I used the Inversion library's count function. Since that function takes the 1-D array, I
+       needed to create a 1-D list aList first, which has all the same tiles of the 2-d array tiles.
+
+       8) neighbours() - In this method, I am finding all the possible neighbour of the Board.
+       Since there are four legal moves - left, right, up, and down, there would be four possible
+       neighbours only. Also, because we would be modifying the array tiles, I need to create a clone of
+       tiles each time. For this I am using a helper method - cloneTiles(). After that, I
+       swap the blank tile with either of the corresponding tile(left, right, up, down) to create
+       four neighbours. Then, I created a new Board object which has the modified tiles representing
+       a Board object which is a one of the four possible neighbour of the tile.
+       Then I enqueue it into the Linkedlist q created above so that one can
+       iterate through them as the Board object.
+
+       9) equals() - In this method I am checking of this Board object is equal to the other board obejct.
+       one object is equal to other if the size of the of this is equal to the other. And if each tile
+       in tiles at location(i,j) is equal in other.tiles. Otherwise, return false.
+
+       Issues and resolution: The issues that I had was not subtracting 1 from the index when I
+       am converting from row major order to index. Also, I was not adding one in teh value of the
+       blankPos. I needed to do it, because in our implementation, we start the encoding of the 1-D
+       array at index 1. This issue was resolved by the T.A Richard.
+       The another issue, that I had was that in the equal method, I was returning true even when one
+       element matches with the other Board object. That was wrong. It was resolved by prof.Swami Iyer.
+
+    Problem 2 (Solver Data Type)
+       Approach: In Solver, I am using the A* algorithm to find the solution of the puzzle if there
+        is one in the quickest possible way.
+        Corner Cases - If board is null then throw a NullPointerException with a message saying
+        that the board is null.
+
+        If the board is not solvable then throw an IllegalArgumentException saying that the
+        board is unsolvable. (Critical optimization)
+
+        1) Instance variable - int moves(To store the value of number of moves made from the initial
+        Board till the Goal's Board) , LinkedStack<Board> solution(To store the solution in the sequence.)
+
+        2) private class(SearchNode) -  Then, I coded for the private class SearchNode which implements
+        Comparable.
+            1) Instance Variable - Board board(Board represented by this node),
+               int moves (Number of moves it made till yet from the initial board),
+               SearchNode previous(previous SearchNode).
+
+            2) Constructor() - I initialised my instance variable to the appropriate values.
+
+            3) CompareTo - Since this class implements comparable. The compareTo method,Compares two
+               nodes using the manhattan priority function (which is the sum of the manhattan distance
+               and the number of moves made). This is the method, then helps to remove the node form the
+               MinPQ of the minimum priority.
+
+        3)I first created a MinPQ pq in which initially I inserted the initial node(initial Board, 0 moves, null
+        previous node). Then as long as the MinPQ is not empty, I am deleting the SearchNode of the
+        minimum priority function and calling it 'node'(this helps to find the solution quickly) and then coding an of-else
+         condition. The if- else condition checks if the node.board(deleted SearchNode's board) is the
+        goal board or not by calling the isGoal() method from the Board datatype. If not, then I am looking for
+        its each neighbour in the else part. For each neighbour, I am checking if the neighbour is
+        equal to the node.previous or not(Critical optimization). If the neighbour is not equal then I
+        create a new SearchNode with the appropriate values(neighbour board, moves+1, node.previous)
+        and enqueue it to  MinPQ pq otherwise I continue looking other neighbour if there is one.
+        Otherwise, I then again delete the SearchNode and repeat the same process until the
+        SearchNode with the goal board is found.
+        If the goal board is found, then I extract the number of moves from the SearchNode and initialise
+        the this.moves to it. Also, add the node and the previous.node into the stack in a way that
+        it comes out in the sequence when popped(initial first and so on uphill the goal board).
+
+       Issues and resolution: The issues that I had with this problem was that I was creating object
+       as Board object = node.previous.board;. This was wrong as it resulted into an NullPointerException
+       when the object was null. The issue was resolved by prof.Swami Iyer as he asked me to change it
+       to Board previousBoard = (node.previous == null) ? null : node.previous.board;
+
+       Another issue that I had was that I was coding an extra condition in the else loop.
+       The condition - node.previous != null. It totally slipped out of my mind that node.previous for the initial
+       node is null. Again, it was resolved by prof.Swami.
+
+       Another issue that I had was that I was getting an empty stack in the end and 0 moves,
+       because my equal method was wrong initially. As my neighbour were not getting added and instead
+       the initially stored nodes from the MinPq were getting deleted. Prof.Swami helped me to fix the
+       equal method. After that, it was resolved.
+
+4. Did you receive help from anyone? List their names, status (classmate,
+   CS210 grad, TA, other), and the nature of help received.
+
+   Name               Status       Help Received
+   Swami Iyer        Professor    Problem 2 and Problem 1
+
+  Richard Anarfi        T.A      Problem 1 and CertifyHeap.java
+
+5. List any other comments here. Feel free to provide any feedback on how
+   much you learned from doing the assignment, and whether you enjoyed
+   doing it.
+
+   An interesting project.
